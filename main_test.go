@@ -1,5 +1,11 @@
 package schema
 
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
 func ptr[v any](obj v) *v {
 	return &obj
 }
@@ -35,3 +41,22 @@ const exampleDnsSchemaString = `{
 	"domain": "one.one.one.one",
 	"expected_output": "1.1.1.1"
 }`
+
+func TestMarhsal(t *testing.T) {
+	data, err := Marshal(exampleDnsSchemaStruct)
+	assert.NoError(t, err)
+	assert.JSONEq(t, exampleDnsSchemaString, string(data))
+}
+
+func TestUnmarshal(t *testing.T) {
+	newDNSSchema := exampleDnsSchema{}
+	err := Unmarshal([]byte(exampleDnsSchemaString), &newDNSSchema)
+	assert.NoError(t, err)
+	assert.Equal(t, exampleDnsSchemaStruct, newDNSSchema)
+}
+
+func TestDescribe(t *testing.T) {
+	fields, err := Describe(exampleDnsSchemaStruct)
+	assert.NoError(t, err)
+	assert.Equal(t, exampleDnsSchemaFields, fields)
+}
