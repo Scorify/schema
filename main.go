@@ -9,10 +9,10 @@ const (
 )
 
 type Field struct {
-	Key     string
-	Type    FieldType
-	Default *string
-	Enum    *[]string
+	Key     string    `json:"key"`
+	Type    FieldType `json:"type"`
+	Default *string   `json:"default"`
+	Enum    *[]string `json:"enum"`
 }
 
 func Marshal(obj interface{}) ([]byte, error) {
