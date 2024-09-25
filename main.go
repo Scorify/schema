@@ -1,5 +1,10 @@
 package schema
 
+import (
+	"reflect"
+	"strings"
+)
+
 type FieldType string
 
 const (
@@ -24,5 +29,30 @@ func Unmarshal(data []byte, obj interface{}) error {
 }
 
 func Describe(obj interface{}) ([]*Field, error) {
-	panic("not implemented")
+	schemaValue := reflect.ValueOf(obj)
+
+	fields := make([]*Field, 0, schemaValue.NumField())
+
+	for i := 0; i < schemaValue.NumField(); i++ {
+		field := schemaValue.Field(i)
+		fieldType := schemaValue.Type().Field(i)
+
+		newField := &Field{
+			Key:  fieldType.Tag.Get("key"),
+			Type: FieldType(field.Kind().String()),
+		}
+
+		if defaultVal, ok := fieldType.Tag.Lookup("default"); ok {
+			newField.Default = &defaultVal
+		}
+
+		if enumVal, ok := fieldType.Tag.Lookup("enum"); ok {
+			enumVals := strings.Split(enumVal, ",")
+			newField.Enum = &enumVals
+		}
+
+		fields = append(fields, newField)
+	}
+
+	return fields, nil
 }
