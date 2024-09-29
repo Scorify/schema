@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -36,7 +38,36 @@ func Marshal(obj interface{}) ([]byte, error) {
 }
 
 func Unmarshal(data []byte, obj interface{}) error {
-	panic("not implemented")
+	schemaValues := reflect.ValueOf(obj).Elem()
+
+	var fields map[string]interface{}
+	err := json.Unmarshal(data, &fields)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < schemaValues.NumField(); i++ {
+		field := schemaValues.Field(i)
+		fieldType := schemaValues.Type().Field(i)
+
+		val, ok := fields[fieldType.Tag.Get("key")]
+		if ok {
+			switch field.Kind() {
+			case reflect.String:
+				field.SetString(val.(string))
+			case reflect.Int:
+				field.SetInt(int64(val.(float64)))
+			case reflect.Bool:
+				field.SetBool(val.(bool))
+			default:
+				return fmt.Errorf("unsupported type: %s", field.Kind().String())
+			}
+		} else {
+			return fmt.Errorf("missing key: %s", fieldType.Tag.Get("key"))
+		}
+	}
+
+	return nil
 }
 
 func Describe(obj interface{}) ([]*Field, error) {
