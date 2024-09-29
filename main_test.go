@@ -42,7 +42,7 @@ const exampleDnsSchemaString = `{
 	"expected_output": "1.1.1.1"
 }`
 
-func TestMarhsal(t *testing.T) {
+func TestMarshal(t *testing.T) {
 	data, err := Marshal(exampleDnsSchemaStruct)
 	assert.NoError(t, err)
 	assert.JSONEq(t, exampleDnsSchemaString, string(data))
