@@ -21,7 +21,18 @@ type Field struct {
 }
 
 func Marshal(obj interface{}) ([]byte, error) {
-	panic("not implemented")
+	schemaValues := reflect.ValueOf(obj)
+
+	fields := make(map[string]interface{}, schemaValues.NumField())
+
+	for i := 0; i < schemaValues.NumField(); i++ {
+		field := schemaValues.Field(i)
+		fieldType := schemaValues.Type().Field(i)
+
+		fields[fieldType.Tag.Get("key")] = field.Interface()
+	}
+
+	return json.Marshal(fields)
 }
 
 func Unmarshal(data []byte, obj interface{}) error {
